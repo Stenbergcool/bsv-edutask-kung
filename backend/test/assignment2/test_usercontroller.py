@@ -10,7 +10,7 @@ def mock_dao():
 def user_controller(mock_dao):
     return UserController(dao=mock_dao)
 
-# All of these should raise ValueError
+# Tests invalid email formats - all should raise ValueError
 @pytest.mark.parametrize('email', [
     'invalid-email', 
     'invalid-email@', 
@@ -23,16 +23,19 @@ def test_get_user_by_email_invalid_email(user_controller, email):
     with pytest.raises(ValueError, match='Error: invalid email address'):
         user_controller.get_user_by_email(email)
 
+# Test case for when theres no used returned from database method call - should return None
 def test_get_user_by_email_no_user(user_controller):
     user_controller.dao.find.return_value = []
     result = user_controller.get_user_by_email('test@test.com')
     assert result is None
 
+# Test case for when the database method throws an exception - should raise the same exception
 def test_get_user_by_email_database_throw(user_controller):
     user_controller.dao.find.side_effect = Exception("Database error")
     with pytest.raises(Exception, match='Database error'):
         user_controller.get_user_by_email('test@test.com')
 
+# Test case for when there are multiple users with the same email - should print an error message and return the email
 def test_get_user_by_email_two_user_same_email(user_controller, capfd):
     user_controller.dao.find.return_value = ['test@test.com','test@test.com']
     result = user_controller.get_user_by_email('test@test.com')
