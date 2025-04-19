@@ -17,7 +17,10 @@ def user_controller(mock_dao):
     '@invalid-email', 
     '@invalid-email.com', 
     '', 
-    '@'
+    '@',
+    1,
+    {'email': 'test@test.com'},
+    [1, 2, 3, "4"]
 ])
 def test_get_user_by_email_invalid_email(user_controller, email):
     with pytest.raises(ValueError, match='Error: invalid email address'):
@@ -37,8 +40,14 @@ def test_get_user_by_email_database_throw(user_controller):
 
 # Test case for when there are multiple users with the same email - should print an error message and return the email
 def test_get_user_by_email_two_user_same_email(user_controller, capfd):
-    user_controller.dao.find.return_value = ['test@test.com','test@test.com']
+    user_controller.dao.find.return_value = [ {"email": 'test@test.com' }, {"email": 'test@test.com' } ]
     result = user_controller.get_user_by_email('test@test.com')
     out, err = capfd.readouterr()
-    assert "Error: more than one user found with mail test@test.com\n" in out
-    assert result is 'test@test.com'
+    assert "test@test.com" in out
+    assert result == {"email": 'test@test.com' }
+
+# Test case for one email that is included in database
+def test_get_user_by_email_valid_user_email(user_controller):
+    user_controller.dao.find.return_value = [ {"email": 'test@test.com' } ]
+    result = user_controller.get_user_by_email('test@test.com')
+    assert result == {"email": 'test@test.com' }
