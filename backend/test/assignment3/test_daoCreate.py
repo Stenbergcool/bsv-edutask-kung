@@ -67,8 +67,22 @@ class TestDaoCreate:
         assert excinfo.type is WriteError
 
     def test_create_document_incorrect_bson_type(self, sut):
-        self.example_data["tasks"] = 55
+        data = self.example_data.copy()
+        data["tasks"] = 55
 
         with pytest.raises(WriteError) as excinfo:
-            sut.create(self.example_data)
+            sut.create(data)
         assert excinfo.type is WriteError
+
+    def test_database_unavailable(self):
+        # Attempt to connect to port 11111 with no db available
+        with patch.dict('os.environ', {'MONGO_URL': 'mongodb://root:root@edutask-mongodb:11111?authSource=admin'}):
+            with patch('src.util.dao.getValidator', autospec=True) as mockedValidator:
+                mockedValidator.return_value = self.test_schema
+                dao=None
+                with pytest.raises(Exception) as excinfo:
+                    dao = DAO('test_collection_integration_tests')
+                    dao.create(self.example_data)
+                print(f"Caught exception: {excinfo}")
+                if dao:
+                    dao.collection.drop()
