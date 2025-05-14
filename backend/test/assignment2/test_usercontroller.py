@@ -39,11 +39,15 @@ def test_get_user_by_email_database_throw(user_controller):
         user_controller.get_user_by_email('test@test.com')
 
 # Test case for when there are multiple users with the same email - should print an error message and return the email
-def test_get_user_by_email_two_user_same_email(user_controller, capfd):
+def test_get_user_by_email_two_user_same_email_prints_error(user_controller, capfd):
     user_controller.dao.find.return_value = [ {"email": 'test@test.com' }, {"email": 'test@test.com' } ]
     result = user_controller.get_user_by_email('test@test.com')
     out, err = capfd.readouterr()
     assert "test@test.com" in out
+
+def test_get_user_by_email_two_user_same_email_returns_user(user_controller, capfd):
+    user_controller.dao.find.return_value = [ {"email": 'test@test.com' }, {"email": 'test@test.com' } ]
+    result = user_controller.get_user_by_email('test@test.com')
     assert result == {"email": 'test@test.com' }
 
 # Test case for one email that is included in database
