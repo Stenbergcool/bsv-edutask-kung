@@ -5,7 +5,7 @@ name: Pytest
 
 on:
   push:
-    branches: [ "feature/bjorn/assignment6" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
