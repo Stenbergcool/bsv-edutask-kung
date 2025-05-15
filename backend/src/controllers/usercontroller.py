@@ -28,7 +28,6 @@ class UserController(Controller):
         """
 
         if not isinstance(email, str) or not emailValidator.fullmatch(email):
-            print("hello")
             raise ValueError('Error: invalid email address')
 
         try:
